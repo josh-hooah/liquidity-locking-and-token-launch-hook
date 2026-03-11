@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>LaunchLock Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+    <main class="shell">
+      <header class="hero">
+        <p class="eyebrow">Uniswap v4 Launch Protection</p>
+        <h1>Liquidity Locking Launch Console</h1>
+        <p>
+          Configure deterministic launch policies, initialize launch pools, run anti-snipe checks, advance unlocks,
+          and withdraw only unlocked liquidity.
+        </p>
+        <div class="hero-actions">
+          <button id="connectBtn">Connect Wallet</button>
+          <span id="walletStatus">Not connected</span>
+        </div>
+      </header>
+
+      <section class="card two-col">
+        <h2>Contract Endpoints</h2>
+        <label>LaunchManager <input id="launchManagerAddress" placeholder="0x..." /></label>
+        <label>Vault <input id="vaultAddress" placeholder="0x..." /></label>
+        <label>PoolManager <input id="poolManagerAddress" placeholder="0x..." /></label>
+        <label>ModifyLiquidity Router <input id="modifyRouterAddress" placeholder="0x..." /></label>
+        <label>Swap Router <input id="swapRouterAddress" placeholder="0x..." /></label>
+      </section>
+
+      <section class="card two-col">
+        <h2>Launch Setup</h2>
+        <label>Token0 <input id="token0" placeholder="0x..." /></label>
+        <label>Token1 <input id="token1" placeholder="0x..." /></label>
+        <label>Hook <input id="hookAddress" placeholder="0x..." /></label>
+        <label>Fee (e.g. 3000) <input id="fee" value="3000" /></label>
+        <label>Tick Spacing <input id="tickSpacing" value="60" /></label>
+        <label>Launch Start (unix) <input id="launchStart" /></label>
+        <label>Launch End (unix) <input id="launchEnd" /></label>
+        <label>Paired Asset <input id="pairedAsset" placeholder="0x..." /></label>
+        <label>Reference Tick <input id="referenceTick" value="0" /></label>
+        <label>Mode (0=time,1=volume,2=hybrid) <input id="mode" value="1" /></label>
+        <label>Time Cliff Seconds <input id="timeCliff" value="0" /></label>
+        <label>Time Epoch Seconds <input id="timeEpoch" value="3600" /></label>
+        <label>Time Unlock BPS/Epoch <input id="timeUnlockBps" value="500" /></label>
+        <label>Min Trade Size For Volume <input id="minTradeSize" value="1" /></label>
+        <label>Max Tx In Launch Window <input id="maxTx" value="1000000000000000" /></label>
+        <label>Cooldown Seconds <input id="cooldown" value="30" /></label>
+        <label>Stability Band Ticks <input id="stabilityBand" value="0" /></label>
+        <label>Stability Min Duration Sec <input id="stabilityDuration" value="0" /></label>
+        <label>Emergency Pause (true/false) <input id="emergencyPause" value="false" /></label>
+        <label>Volume Milestones (comma-separated)
+          <input id="milestones" value="2000000000000,4000000000000" />
+        </label>
+        <label>Unlock BPS at Milestones (comma-separated)
+          <input id="milestoneBps" value="2000,4000" />
+        </label>
+        <button id="createLaunchBtn">Create Launch</button>
+        <div class="mono" id="createLaunchOut"></div>
+      </section>
+
+      <section class="card two-col">
+        <h2>Pool Initialization + Liquidity Seeding</h2>
+        <label>Pool ID <input id="poolId" placeholder="0x..." /></label>
+        <label>Sqrt Price X96 <input id="sqrtPrice" value="79228162514264337593543950336" /></label>
+        <label>Tick Lower <input id="tickLower" value="-120" /></label>
+        <label>Tick Upper <input id="tickUpper" value="120" /></label>
+        <label>Liquidity Delta <input id="liquidityDelta" value="1000000000000000000" /></label>
+        <label>Salt (bytes32)
+          <input id="positionSalt" value="0x0000000000000000000000000000000000000000000000000000000000000000" />
+        </label>
+        <label>Locked Amount0 <input id="lockAmount0" value="1000000000000000000" /></label>
+        <label>Locked Amount1 <input id="lockAmount1" value="1000000000000000000" /></label>
+        <button id="initializePoolBtn">Initialize Pool</button>
+        <button id="seedLiquidityBtn">Seed Uniswap Liquidity</button>
+        <button id="depositLockBtn">Deposit Locked Liquidity</button>
+        <div class="mono" id="seedOut"></div>
+      </section>
+
+      <section class="card two-col">
+        <h2>Swap Sequence + Unlock Progress</h2>
+        <label>Swap Amounts In (comma-separated, wei)
+          <input id="swapAmounts" value="500000000000000,200000000000000" />
+        </label>
+        <label>Swap Direction zeroForOne (true/false) <input id="zeroForOne" value="true" /></label>
+        <label>Price Limit X96 <input id="sqrtPriceLimit" value="4295128741" /></label>
+        <button id="runSwapsBtn">Run Swap Sequence</button>
+        <button id="advanceBtn">Advance Unlock</button>
+        <button id="refreshBtn">Refresh Progress</button>
+        <label>Withdraw Amount0 <input id="withdraw0" value="0" /></label>
+        <label>Withdraw Amount1 <input id="withdraw1" value="0" /></label>
+        <button id="withdrawBtn">Withdraw Unlocked</button>
+        <div class="mono" id="progressOut"></div>
+      </section>
+
+      <footer class="mono">
+        <p>Serve from repo root: <code>python3 -m http.server 8080</code>, then open <code>/frontend/</code>.</p>
+      </footer>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.15.0/dist/ethers.umd.min.js"></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
