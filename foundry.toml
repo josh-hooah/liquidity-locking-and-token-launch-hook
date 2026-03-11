@@ -1,0 +1,22 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+solc_version = "0.8.26"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+ffi = true
+fs_permissions = [{ access = "read-write", path = "./" }]
+gas_reports = ["*"]
+bytecode_hash = "none"
+cbor_metadata = false
+
+[fuzz]
+runs = 512
+
+[profile.ci]
+fuzz = { runs = 1000 }
+verbosity = 4

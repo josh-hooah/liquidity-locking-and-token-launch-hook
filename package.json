@@ -1,0 +1,11 @@
+{
+  "name": "liquidity-locking-and-token-launch-hook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for deterministic launch liquidity locking on Uniswap v4",
+  "license": "MIT",
+  "scripts": {
+    "frontend:serve": "python3 -m http.server 8080",
+    "deps:check": "./scripts/bootstrap.sh --check-only"
+  }
+}
