@@ -27,4 +27,9 @@ Covered edge behaviors:
 - pause/unpause behavior
 - hook permission mismatch and only-hook gating
 
-Latest measured source coverage (contracts under `src/`): ~93.65% lines.
+Current measurement:
+
+- `Total Lines: 100.00% (299/299)`
+- `Total Functions: 100.00% (45/45)`
+- `Total Statements: 97.16% (342/352)`
+- `Total Branches: 84.85% (56/66)`

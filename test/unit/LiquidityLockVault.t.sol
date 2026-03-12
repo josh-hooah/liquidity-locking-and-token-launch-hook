@@ -112,4 +112,10 @@ contract LiquidityLockVaultTest is Test {
         vm.expectRevert(LiquidityLockVault.WithdrawExceedsUnlocked.selector);
         vault.withdrawTo(poolId, address(this), 20, 20);
     }
+
+    function testWithdrawableAmountsUninitializedPoolReturnsZero() external view {
+        (uint256 amount0, uint256 amount1) = vault.withdrawableAmounts(keccak256("unknown-pool"));
+        assertEq(amount0, 0);
+        assertEq(amount1, 0);
+    }
 }

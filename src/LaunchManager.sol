@@ -263,22 +263,22 @@ contract LaunchManager is Ownable {
 
         if (candidate <= launch.state.unlockedBps) {
             return launch.state.unlockedBps;
+        } else {
+            launch.state.unlockedBps = candidate;
+            launch.state.lastUnlockTimestamp = uint64(block.timestamp);
+            launch.state.lastProgressBlock = uint64(block.number);
+
+            if (candidate == 10_000) {
+                launch.state.status = LaunchStatus.FINALIZED;
+            }
+
+            if (launch.state.totalLiquidityLocked > 0) {
+                vault.syncUnlockedBps(poolId, candidate);
+            }
+            emit UnlockProgressed(poolId, candidate, ReasonCodes.NONE);
+
+            return candidate;
         }
-
-        launch.state.unlockedBps = candidate;
-        launch.state.lastUnlockTimestamp = uint64(block.timestamp);
-        launch.state.lastProgressBlock = uint64(block.number);
-
-        if (candidate == 10_000) {
-            launch.state.status = LaunchStatus.FINALIZED;
-        }
-
-        if (launch.state.totalLiquidityLocked > 0) {
-            vault.syncUnlockedBps(poolId, candidate);
-        }
-        emit UnlockProgressed(poolId, candidate, ReasonCodes.NONE);
-
-        return candidate;
     }
 
     function onBeforeSwap(PoolKey calldata key, address trader, int256 amountSpecified) external onlyHook {

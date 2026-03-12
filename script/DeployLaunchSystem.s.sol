@@ -17,15 +17,24 @@ import {ILiquidityLockVault} from "../src/interfaces/ILiquidityLockVault.sol";
 import {ILaunchManager} from "../src/interfaces/ILaunchManager.sol";
 
 contract DeployLaunchSystem is Script {
-    function run() external returns (PoolManager, LiquidityLockVault, LaunchManager, LaunchLockHook, HookDeployer) {
+    function run() external {
         uint256 deployerPk = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPk);
+        address owner = vm.envOr("OWNER_ADDRESS", deployer);
+        address configuredPoolManager = vm.envOr("POOL_MANAGER_ADDRESS", address(0));
 
         vm.startBroadcast(deployerPk);
 
-        PoolManager poolManager = new PoolManager(deployer);
-        LiquidityLockVault vault = new LiquidityLockVault(deployer);
-        LaunchManager launchManager = new LaunchManager(poolManager, ILiquidityLockVault(address(vault)), deployer);
+        IPoolManager poolManager;
+        bool deployedPoolManager = configuredPoolManager == address(0);
+        if (deployedPoolManager) {
+            poolManager = IPoolManager(address(new PoolManager(owner)));
+        } else {
+            poolManager = IPoolManager(configuredPoolManager);
+        }
+
+        LiquidityLockVault vault = new LiquidityLockVault(owner);
+        LaunchManager launchManager = new LaunchManager(poolManager, ILiquidityLockVault(address(vault)), owner);
         HookDeployer hookDeployer = new HookDeployer();
 
         vault.setManager(address(launchManager));
@@ -48,12 +57,15 @@ contract DeployLaunchSystem is Script {
         vm.stopBroadcast();
 
         console2.log("DEPLOYER", deployer);
-        console2.log("POOL_MANAGER", address(poolManager));
+        console2.log("OWNER", owner);
+        if (deployedPoolManager) {
+            console2.log("POOL_MANAGER", address(poolManager));
+        } else {
+            console2.log("POOL_MANAGER_REUSED", address(poolManager));
+        }
         console2.log("VAULT", address(vault));
         console2.log("LAUNCH_MANAGER", address(launchManager));
         console2.log("HOOK_DEPLOYER", address(hookDeployer));
         console2.log("HOOK", address(hook));
-
-        return (poolManager, vault, launchManager, hook, hookDeployer);
     }
 }

@@ -19,13 +19,35 @@ if [[ ! -f "$RUN_FILE" ]]; then
 fi
 
 echo "Broadcast file: $RUN_FILE"
+echo "Chain ID: $CHAIN_ID"
 
 echo "Transactions:"
-jq -r '.transactions[] | [.transactionType, .contractName, .contractAddress, .hash] | @tsv' "$RUN_FILE" | while IFS=$'\t' read -r txType contractName contractAddress hash; do
+jq -r '
+  .transactions as $txs
+  | .receipts as $receipts
+  | range(0; ($txs | length)) as $i
+  | [
+      ($i + 1 | tostring),
+      ($txs[$i].transactionType // "-"),
+      ($txs[$i].contractName // "-"),
+      ($txs[$i].function // "-"),
+      ($txs[$i].contractAddress // "-"),
+      ($txs[$i].hash // "-"),
+      ($receipts[$i].status // "0x0"),
+      ($receipts[$i].gasUsed // "0x0")
+    ]
+  | @tsv
+' "$RUN_FILE" | while IFS=$'\t' read -r idx txType contractName functionName contractAddress hash status gasUsed; do
   if [[ -n "$EXPLORER_TX_BASE_URL" ]]; then
     txUrl="${EXPLORER_TX_BASE_URL}${hash}"
   else
     txUrl="TBD ${hash}"
   fi
-  echo "- type=${txType} contract=${contractName} address=${contractAddress} hash=${hash} explorer=${txUrl}"
+
+  statusLabel="FAILED"
+  if [[ "$status" == "0x1" ]]; then
+    statusLabel="SUCCESS"
+  fi
+
+  echo "- [${idx}] status=${statusLabel} type=${txType} contract=${contractName} function=${functionName} address=${contractAddress} gasUsed=${gasUsed} hash=${hash} explorer=${txUrl}"
 done

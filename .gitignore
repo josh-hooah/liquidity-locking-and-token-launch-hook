@@ -12,3 +12,6 @@ out/
 
 # Node
 node_modules/
+
+# Coverage artifacts
+lcov.info

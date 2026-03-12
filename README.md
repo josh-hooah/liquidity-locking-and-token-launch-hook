@@ -13,6 +13,7 @@ This monorepo implements a launch manager + v4 hook architecture that:
 - unlocks liquidity progressively from deterministic on-chain criteria
 - allows permissionless unlock progression via `advance()`
 - avoids offchain keepers/bots for correctness
+- does not integrate Reactive network components
 
 ## Problem
 Token launches are highly fragile in the first minutes/hours:
@@ -115,11 +116,12 @@ make demo-unlock
 make demo-all
 ```
 
-Testnet demo (Base Sepolia preferred):
+Unichain Sepolia demo (reuses deployed system from `.env`):
 
 ```bash
-export PRIVATE_KEY=0x...
-export BASE_SEPOLIA_RPC_URL=https://...
+cp .env.example .env
+# fill signer + rpc values
+make deploy-testnet
 make demo-testnet
 ```
 
@@ -138,18 +140,48 @@ Local:
 make deploy-local
 ```
 
-Testnet:
+Unichain Sepolia:
 
 ```bash
-export PRIVATE_KEY=0x...
-export BASE_SEPOLIA_RPC_URL=https://...
 make deploy-testnet
 ```
 
 Current address table:
 
 - Local Anvil (`31337`): generated per run, printed by scripts
-- Base Sepolia: TBD (run `make deploy-testnet`)
+- Unichain Sepolia (`1301`): deployment script writes these into `.env`
+  - `POOL_MANAGER_ADDRESS=0x00b036b58a818b1bc34d502d3fe730db729e62ac`
+  - `LIQUIDITY_LOCK_VAULT_ADDRESS=0xb664e46c230951da4389e195188aa4203fa76af0`
+  - `LAUNCH_MANAGER_ADDRESS=0x53edcb5facceede8a1eac2237daebf7fc983a574`
+  - `HOOK_DEPLOYER_ADDRESS=0x3726b4eaf838fcff2096461a920fa277af313317`
+  - `LAUNCH_LOCK_HOOK_ADDRESS=0x8165120E7C04bD5F52dF16d90365f87C1DFe80c0`
+
+## End-to-End Workflow
+System demo phases now logged directly by `script/DemoLaunchLifecycle.s.sol`:
+
+1. `PHASE_1_SETUP_COMPLETE`
+   - creator perspective: launch console can begin setup
+   - infrastructure attached (`USE_DEPLOYED_SYSTEM`) or freshly deployed (`DEPLOY_FRESH_SYSTEM`)
+2. `PHASE_2_LAUNCH_CREATED`
+   - creator perspective: launch config + policy are committed on-chain
+   - policy logs include anti-snipe max-tx, cooldown, and volume milestones
+3. `PHASE_3_POOL_INITIALIZED_AND_LIQUIDITY_LOCKED`
+   - creator perspective: pool initialized and seed liquidity moved into vault custody
+4. `PHASE_4_ALLOWED_SWAP_EXECUTED` + blocked checks
+   - trader perspective: compliant swap succeeds
+   - oversized/cooldown-violating attempts are shown as blocked in demo logs
+5. `PHASE_5_PERMISSIONLESS_ADVANCE_EXECUTED`
+   - anyone can call `advance()` to progress deterministic unlock state
+6. `PHASE_6_CREATOR_WITHDREW_UNLOCKED_PORTION`
+   - creator perspective: only unlocked liquidity can be withdrawn
+   - remainder remains locked and protected
+
+Every broadcast transaction is printed with:
+- status
+- tx hash
+- contract/function
+- gas used
+- explorer URL
 
 ## Dependency Pinning
 Pinned refs:
