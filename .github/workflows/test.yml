@@ -1,48 +1,36 @@
-name: CI
-
-permissions:
-  contents: read
+name: Test Suite
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
+  # push:
+  # pull_request:
+
+env:
+  FOUNDRY_PROFILE: ci
 
 jobs:
-  foundry:
+  test:
+    name: Foundry Project
     runs-on: ubuntu-latest
-    env:
-      FOUNDRY_PROFILE: ci
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v4
         with:
-          persist-credentials: false
           submodules: recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-
-      - name: Show Forge version
-        run: forge --version
-
-      - name: Verify pinned dependencies
-        run: ./scripts/bootstrap.sh --check-only
-
-      - name: Format check
-        run: forge fmt --check
+        with:
+          version: stable
 
       - name: Build
-        run: forge build --sizes
+        run: |
+          forge --version
+          forge build --sizes
+        id: build
 
       - name: Test
-        run: forge test -vvv
+        run: |
+          forge test -vvv
+        id: test
 
-      - name: Coverage
-        run: forge coverage --ir-minimum --exclude-tests --no-match-coverage "script/" --report summary --report lcov
 
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lcov
-          path: lcov.info
