@@ -15,3 +15,8 @@ node_modules/
 
 # Coverage artifacts
 lcov.info
+
+# Local-only project folders
+frontend/
+lib/
+context/
