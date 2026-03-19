@@ -4,6 +4,7 @@ out = "out"
 libs = ["lib"]
 test = "test"
 script = "script"
+no_match_coverage = "(^|/)(script|helpers?|lib)(/|$)"
 solc_version = "0.8.26"
 evm_version = "cancun"
 optimizer = true

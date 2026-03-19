@@ -5,7 +5,7 @@ _Targeting: Uniswap Foundation Prize · Unichain Prize_
 > Deterministic launch protection for Uniswap v4 pools: lock liquidity at launch, enforce swap-time guards, and unlock only when on-chain time/volume/stability conditions are satisfied.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/josh-hooah/liquidity-locking-and-token-launch-hook/test.yml?label=CI)](https://github.com/josh-hooah/liquidity-locking-and-token-launch-hook/actions/workflows/test.yml)
-[![Coverage](https://img.shields.io/badge/coverage-lines%20100%25%20%7C%20statements%2097.16%25%20%7C%20branches%2084.85%25%20%7C%20funcs%20100%25-brightgreen)](#test-coverage)
+[![Coverage](https://img.shields.io/badge/coverage-lines%20100%25%20%7C%20statements%20100%25%20%7C%20branches%20100%25%20%7C%20funcs%20100%25-brightgreen)](#test-coverage)
 [![Solidity](https://img.shields.io/badge/solidity-0.8.26-363636)](https://github.com/ethereum/solidity/releases/tag/v0.8.26)
 [![Uniswap v4](https://img.shields.io/badge/Uniswap-v4-ff007a)](https://docs.uniswap.org/contracts/v4/overview)
 [![Unichain Sepolia](https://img.shields.io/badge/Unichain-Sepolia%20%281301%29-00a86b)](https://sepolia.uniscan.xyz)
@@ -222,16 +222,21 @@ make demo-all
 
 ## Test Coverage
 ```text
-Lines:       100.00% (299/299)
-Statements:   97.16% (342/352)
-Branches:     84.85% (56/66)
-Functions:   100.00% (45/45)
+Lines:       100.00% (345/345)
+Statements:  100.00% (396/396)
+Branches:    100.00% (67/67)
+Functions:   100.00% (50/50)
 ```
 
 ```bash
 # Reproduce coverage report
 make coverage
+
+# Reproduce the same IR-minimum summary shown below
+forge coverage --ir-minimum --report summary
 ```
+
+![Forge coverage --ir-minimum summary (100% across all metrics)](assets/coverage-ir-minimum-100.png)
 
 - `unit`: launch policy bounds, access control, pause, max-tx, cooldown, vault accounting.
 - `fuzz`: monotonic unlock bounds, monotonic volume counters, withdrawal never exceeds unlocked.

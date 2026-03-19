@@ -38,11 +38,6 @@ contract LiquidityLockVault is Ownable, ReentrancyGuard {
     event UnlockSynced(bytes32 indexed poolId, uint16 unlockedBps);
     event Withdrawn(bytes32 indexed poolId, address indexed to, uint256 amount0, uint256 amount1);
 
-    modifier onlyManager() {
-        if (msg.sender != manager) revert NotManager();
-        _;
-    }
-
     constructor(address initialOwner) Ownable(initialOwner) {}
 
     function setManager(address newManager) external onlyOwner {
@@ -58,7 +53,8 @@ contract LiquidityLockVault is Ownable, ReentrancyGuard {
         address token1,
         uint256 amount0,
         uint256 amount1
-    ) external onlyManager nonReentrant returns (uint256 shares) {
+    ) external nonReentrant returns (uint256 shares) {
+        if (msg.sender != manager) revert NotManager();
         if (poolId == bytes32(0)) revert InvalidPool();
         if (amount0 == 0 && amount1 == 0) revert NothingToDeposit();
 
@@ -85,7 +81,8 @@ contract LiquidityLockVault is Ownable, ReentrancyGuard {
         emit Deposited(poolId, from, amount0, amount1, shares);
     }
 
-    function syncUnlockedBps(bytes32 poolId, uint16 unlockedBps) external onlyManager {
+    function syncUnlockedBps(bytes32 poolId, uint16 unlockedBps) external {
+        if (msg.sender != manager) revert NotManager();
         if (unlockedBps > BPS_DENOMINATOR) revert InvalidUnlockBps();
 
         VaultPosition storage position = _positions[poolId];
@@ -96,7 +93,8 @@ contract LiquidityLockVault is Ownable, ReentrancyGuard {
         emit UnlockSynced(poolId, unlockedBps);
     }
 
-    function withdrawTo(bytes32 poolId, address to, uint256 amount0, uint256 amount1) external onlyManager nonReentrant {
+    function withdrawTo(bytes32 poolId, address to, uint256 amount0, uint256 amount1) external nonReentrant {
+        if (msg.sender != manager) revert NotManager();
         VaultPosition storage position = _positions[poolId];
         if (!position.initialized) revert InvalidPool();
 

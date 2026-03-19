@@ -34,6 +34,16 @@ contract LiquidityLockVaultTest is Test {
         vault.syncUnlockedBps(poolId, 1000);
     }
 
+    function testDepositOnlyManagerReverts() external {
+        vm.expectRevert(LiquidityLockVault.NotManager.selector);
+        vault.deposit(poolId, address(this), address(token0), address(token1), 1, 1);
+    }
+
+    function testWithdrawOnlyManagerReverts() external {
+        vm.expectRevert(LiquidityLockVault.NotManager.selector);
+        vault.withdrawTo(poolId, address(this), 1, 1);
+    }
+
     function testDepositAndWithdrawFlow() external {
         vm.prank(manager);
         vault.deposit(poolId, address(this), address(token0), address(token1), 1000, 2000);

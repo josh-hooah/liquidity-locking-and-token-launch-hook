@@ -261,9 +261,7 @@ contract LaunchManager is Ownable {
             revert LaunchConstraint(poolId, ReasonCodes.STABILITY_BAND_VIOLATION);
         }
 
-        if (candidate <= launch.state.unlockedBps) {
-            return launch.state.unlockedBps;
-        } else {
+        if (candidate > launch.state.unlockedBps) {
             launch.state.unlockedBps = candidate;
             launch.state.lastUnlockTimestamp = uint64(block.timestamp);
             launch.state.lastProgressBlock = uint64(block.number);
@@ -279,6 +277,8 @@ contract LaunchManager is Ownable {
 
             return candidate;
         }
+
+        return launch.state.unlockedBps;
     }
 
     function onBeforeSwap(PoolKey calldata key, address trader, int256 amountSpecified) external onlyHook {
